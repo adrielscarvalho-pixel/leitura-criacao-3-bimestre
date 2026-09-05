@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trabalho de Leitura e Criação</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Pirata+One&family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #0a0a0f;
+    font-family: 'Cinzel', serif;
+    user-select: none;
+  }
+
+  /* cursor de batata em todo o site */
+  body, .botao {
+    cursor: url("data:image/svg+xml;utf8,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='36'%20height='36'%3E%3Ctext%20y='29'%20font-size='29'%3E🥔%3C/text%3E%3C/svg%3E") 6 6, auto;
+  }
+
+  .tela {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* ============ TELA 0: TOQUE PARA COMEÇAR ============ */
+  #telaToque {
+    background: #0a0a0f;
+    z-index: 40;
+  }
+  #telaToque p {
+    color: #8a8a9a;
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    letter-spacing: 4px;
+    animation: pulsar 1.6s ease-in-out infinite;
+  }
+  @keyframes pulsar {
+    0%, 100% { opacity: 0.35; transform: scale(1); }
+    50%      { opacity: 1;    transform: scale(1.06); }
+  }
+
+  /* ============ TELA 1: SPLASH (estilo Zombie Tsunami) ============ */
+  #telaSplash {
+    background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0f 70%);
+    z-index: 30;
+    display: none;
+  }
+  #tituloSplash {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(2.5rem, 9vw, 7rem);
+    color: #f2f2f2;
+    text-align: center;
+    line-height: 1.05;
+    transform: rotate(-8deg) scale(14);
+    opacity: 0;
+    text-shadow:
+      4px 4px 0 #8b0000,
+      8px 8px 0 #300000,
+      0 0 40px rgba(139, 0, 0, 0.6);
+    -webkit-text-stroke: 2px #000;
+  }
+  #tituloSplash.entrar {
+    animation: slamDiagonal 0.55s cubic-bezier(0.15, 0.9, 0.3, 1.4) forwards;
+  }
+  @keyframes slamDiagonal {
+    0%   { transform: rotate(-25deg) scale(14) translate(-40vw, -40vh); opacity: 0; }
+    60%  { transform: rotate(-8deg)  scale(1.15); opacity: 1; }
+    80%  { transform: rotate(-8deg)  scale(0.95); }
+    100% { transform: rotate(-8deg)  scale(1);    opacity: 1; }
+  }
+  #telaSplash.tremer { animation: tremer 0.4s linear; }
+  @keyframes tremer {
+    0%, 100% { transform: translate(0, 0); }
+    15% { transform: translate(-12px, 8px); }
+    30% { transform: translate(10px, -10px); }
+    45% { transform: translate(-8px, -6px); }
+    60% { transform: translate(8px, 6px); }
+    75% { transform: translate(-5px, 4px); }
+    90% { transform: translate(3px, -3px); }
+  }
+  #flash {
+    position: fixed;
+    inset: 0;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 35;
+  }
+  #flash.piscar { animation: piscar 0.5s ease-out forwards; }
+  @keyframes piscar {
+    0% { opacity: 0.9; }
+    100% { opacity: 0; }
+  }
+  #telaSplash.sair { animation: desvanecer 0.8s ease forwards; }
+  @keyframes desvanecer {
+    to { opacity: 0; visibility: hidden; }
+  }
+  #dicaSplash {
+    position: absolute;
+    bottom: 12%;
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1rem, 2.5vw, 1.6rem);
+    color: #8a8a9a;
+    letter-spacing: 4px;
+    opacity: 0;
+  }
+  #dicaSplash.mostrar { animation: pulsar 1.6s ease-in-out infinite; }
+
+  /* ============ TELA 2: MENU PRINCIPAL ============ */
+  #telaMenu {
+    background: linear-gradient(#0d0d14 0%, #16121c 50%, #0d0d14 100%);
+    z-index: 10;
+    display: none;
+    opacity: 0;
+  }
+  #telaMenu.aparecer {
+    display: flex;
+    animation: surgir 1s ease forwards;
+  }
+  @keyframes surgir { to { opacity: 1; } }
+  #telaMenu.sumir { animation: desvanecer 0.8s ease forwards; }
+
+  /* ============ TELA 3: HISTÓRIA (texto digitando) ============ */
+  #telaHistoria {
+    background: radial-gradient(ellipse at center, #16121c 0%, #0a0a0f 75%);
+    z-index: 20;
+    display: none;
+    opacity: 0;
+  }
+  #telaHistoria.aparecer {
+    display: flex;
+    animation: surgir 1s ease forwards;
+  }
+  #textoHistoria {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 22px;
+    text-align: center;
+    max-width: 900px;
+    padding: 0 24px;
+    min-height: 180px;
+    justify-content: center;
+  }
+  .linhaNormal {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: #e8e6e3;
+    font-size: clamp(1.2rem, 3vw, 2rem);
+    text-shadow: 2px 2px 3px #000;
+  }
+  .linhaDestaque {
+    font-family: 'Pirata One', cursive;
+    color: #a30000;
+    font-size: clamp(1.9rem, 5.5vw, 3.8rem);
+    text-shadow: 0 0 20px rgba(163,0,0,0.6), 2px 2px 2px #000;
+  }
+  .linhaNomes {
+    font-family: 'Bangers', cursive;
+    color: #d4a856;
+    font-size: clamp(1.5rem, 4vw, 2.7rem);
+    letter-spacing: 3px;
+    text-shadow: 2px 2px 0 #000;
+  }
+  /* cursor piscando enquanto digita */
+  .digitando::after {
+    content: '▌';
+    color: #a30000;
+    animation: piscarCursor 0.8s steps(1) infinite;
+  }
+  @keyframes piscarCursor { 50% { opacity: 0; } }
+  #btnAvancar {
+    margin-top: 55px;
+    font-size: clamp(1rem, 2.2vw, 1.4rem);
+    padding: 12px 45px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  #btnAvancar.visivel {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  #telaHistoria.sumir { animation: desvanecer 0.8s ease forwards; }
+
+  /* ============ TELA 4: CAPÍTULOS ============ */
+  #telaCapitulos {
+    background: linear-gradient(#0d0d14 0%, #16121c 50%, #0d0d14 100%);
+    z-index: 15;
+    display: none;
+    opacity: 0;
+  }
+  #telaCapitulos.aparecer {
+    display: flex;
+    animation: surgir 1s ease forwards;
+  }
+  #conteudoCapitulos {
+    position: relative;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    padding: 0 20px;
+  }
+  #tituloCapitulos {
+    font-family: 'Pirata One', cursive;
+    font-size: clamp(2rem, 5.5vw, 3.6rem);
+    color: #a30000;
+    letter-spacing: 2px;
+    text-shadow: 0 0 15px rgba(163,0,0,0.8), 2px 2px 2px #000;
+    animation: brasa 3s ease-in-out infinite;
+  }
+  #gradeCapitulos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(240px, 340px));
+    gap: 18px 22px;
+  }
+  .botaoCapitulo {
+    font-size: clamp(0.95rem, 2vw, 1.25rem);
+    letter-spacing: 2px;
+    padding: 16px 20px;
+    width: 100%;
+  }
+  /* em telas estreitas, os botões ficam em uma coluna só */
+  @media (max-width: 640px) {
+    #gradeCapitulos { grid-template-columns: minmax(240px, 1fr); }
+  }
+  #telaCapitulos.sumir { animation: desvanecer 0.5s ease forwards; }
+
+  /* ============ TELA 5: SEÇÕES (conteúdo dos capítulos) ============ */
+  #telaSecao {
+    background: radial-gradient(ellipse at center, #16121c 0%, #0a0a0f 75%);
+    z-index: 25;
+    display: none;
+    opacity: 0;
+    /* se o conteúdo for maior que a tela, rola em vez de cortar */
+    overflow-y: auto;
+    justify-content: safe center;
+    padding: 50px 0;
+  }
+  #telaSecao.aparecer { display: flex; animation: surgir 0.7s ease forwards; }
+  #telaSecao.sumir { animation: desvanecer 0.5s ease forwards; }
+  #tituloSecao {
+    font-family: 'Pirata One', cursive;
+    font-size: clamp(1.8rem, 5vw, 3.2rem);
+    color: #a30000;
+    text-shadow: 0 0 15px rgba(163,0,0,0.8), 2px 2px 2px #000;
+    margin-bottom: 45px;
+    text-align: center;
+    padding: 0 20px;
+  }
+  #conteudoSecao {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    max-width: 800px;
+    padding: 0 24px;
+  }
+  /* linhas da tela de notas */
+  .linhaNota {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    width: min(430px, 80vw);
+    opacity: 0;
+    transform: translateX(-45px);
+    animation: entrarNota 0.5s ease forwards;
+  }
+  @keyframes entrarNota {
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .nomeNota {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.4rem, 3.5vw, 2.4rem);
+    color: #e8e6e3;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 #000;
+  }
+  .valorNota {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.6rem, 4vw, 2.8rem);
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 #000;
+  }
+  .notaOtima { color: #ffd700; text-shadow: 2px 2px 0 #000, 0 0 18px rgba(255,215,0,0.5); }
+  .notaBoa   { color: #e8913a; }
+  .notaRuim  { color: #c22929; }
+  .avisoEmBreve {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: #8a8a9a;
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+  }
+  /* escolha entre personagens principais e secundários */
+  #escolhaPersonagens {
+    display: flex;
+    gap: 24px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .botaoEscolha {
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem);
+    padding: 18px 50px;
+  }
+  /* cartões de personagem */
+  .cartaPersonagem {
+    width: min(750px, 88vw);
+    background: linear-gradient(rgba(42,10,10,0.55), rgba(20,6,10,0.55));
+    border: 1px solid #4a1010;
+    border-left: 5px solid #a30000;
+    border-radius: 8px;
+    padding: 14px 20px;
+    text-align: left;
+    opacity: 0;
+    transform: translateX(-45px);
+    animation: entrarNota 0.5s ease forwards;
+  }
+  .nomePersonagem {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.5rem, 3.4vw, 2.1rem);
+    color: #d4a856;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    text-shadow: 1px 1px 0 #000;
+  }
+  .descPersonagem {
+    font-family: 'Cinzel', serif;
+    color: #d9d6d1;
+    font-size: clamp(1.1rem, 2.5vw, 1.45rem);
+    line-height: 1.55;
+  }
+  /* nome do autor em destaque */
+  .nomeAutor {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.8rem, 4.5vw, 3rem);
+    color: #e8e6e3;
+    letter-spacing: 3px;
+    text-shadow: 3px 3px 0 #000, 0 0 25px rgba(255,255,255,0.12);
+    opacity: 0;
+    transform: translateX(-45px);
+    animation: entrarNota 0.5s ease forwards;
+  }
+  /* opinião do grupo sobre o livro */
+  .cartaOpiniao {
+    width: min(720px, 88vw);
+    background: linear-gradient(rgba(42,10,10,0.55), rgba(20,6,10,0.55));
+    border: 1px solid #4a1010;
+    border-radius: 10px;
+    padding: 30px 34px;
+    text-align: center;
+    opacity: 0;
+    transform: translateX(-45px);
+    animation: entrarNota 0.5s ease forwards;
+  }
+  .textoOpiniao {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: #e8e6e3;
+    font-size: clamp(1.2rem, 2.8vw, 1.65rem);
+    line-height: 1.7;
+  }
+  .selo12 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-top: 14px;
+    opacity: 0;
+    transform: translateX(-45px);
+    animation: entrarNota 0.5s ease forwards;
+  }
+  .quadrado12 {
+    font-family: 'Bangers', cursive;
+    background: #f8c300;
+    color: #000;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    border: 2px solid #000;
+    font-size: 1.7rem;
+    flex-shrink: 0;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+  }
+  .textoSelo {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    color: #d4a856;
+    font-size: clamp(1rem, 2.2vw, 1.25rem);
+  }
+  #btnVoltar {
+    margin-top: 55px;
+    font-size: clamp(1rem, 2.2vw, 1.4rem);
+    padding: 12px 45px;
+  }
+
+  /* --- estantes de livros passando ao fundo --- */
+  .estante {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 130px;
+    overflow: hidden;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+  .estante::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background: #2b1d12;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.8);
+  }
+  .estanteCima  { top: 6%; }
+  .estanteBaixo { bottom: 6%; }
+  .trilhoLivros {
+    display: flex;
+    align-items: flex-end;
+    height: 120px;
+    width: max-content;
+    gap: 3px;
+  }
+  .estanteCima .trilhoLivros  { animation: rolarEsq 40s linear infinite; }
+  .estanteBaixo .trilhoLivros { animation: rolarDir 55s linear infinite; }
+  @keyframes rolarEsq { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes rolarDir { from { transform: translateX(-50%); } to { transform: translateX(0); } }
+  .livro {
+    width: 26px;
+    border-radius: 3px 3px 0 0;
+    box-shadow: inset -4px 0 6px rgba(0,0,0,0.45), inset 2px 0 3px rgba(255,255,255,0.15);
+    position: relative;
+  }
+  .livro::before {
+    content: '';
+    position: absolute;
+    top: 10px;
+    left: 4px;
+    right: 4px;
+    height: 3px;
+    background: rgba(255, 215, 130, 0.5);
+    border-radius: 2px;
+  }
+  .livro.inclinado { transform: rotate(7deg); transform-origin: bottom left; margin-right: 8px; }
+
+  /* --- vinheta escura nas bordas --- */
+  .vinheta {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.85) 100%);
+    pointer-events: none;
+  }
+
+  /* --- batatas, livros e 67 passando atrás --- */
+  .flutuante {
+    position: absolute;
+    left: -90px;
+    opacity: 0.4;
+    pointer-events: none;
+    animation: atravessar linear infinite;
+  }
+  .flutuante.num67 {
+    font-family: 'Bangers', cursive;
+    color: #a30000;
+    text-shadow: 2px 2px 0 #000, 0 0 12px rgba(163,0,0,0.6);
+  }
+  @keyframes atravessar {
+    from { transform: translateX(0) rotate(-12deg); }
+    to   { transform: translateX(calc(100vw + 180px)) rotate(12deg); }
+  }
+
+  /* --- pena caindo (detalhe do anjo) --- */
+  .pena {
+    position: absolute;
+    top: -60px;
+    font-size: 28px;
+    opacity: 0.5;
+    filter: grayscale(1) brightness(2);
+    animation: cair linear infinite;
+    pointer-events: none;
+  }
+  @keyframes cair {
+    0%   { transform: translateY(0) rotate(0deg) translateX(0); }
+    25%  { transform: translateY(28vh) rotate(60deg) translateX(40px); }
+    50%  { transform: translateY(55vh) rotate(-40deg) translateX(-30px); }
+    75%  { transform: translateY(80vh) rotate(50deg) translateX(30px); }
+    100% { transform: translateY(115vh) rotate(-30deg) translateX(-20px); }
+  }
+
+  /* --- título e subtítulo --- */
+  #conteudoMenu {
+    position: relative;
+    z-index: 5;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  #tituloMenu {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.8rem, 5.5vw, 4rem);
+    color: #e8e6e3;
+    letter-spacing: 3px;
+    text-shadow: 3px 3px 0 #000, 0 0 25px rgba(255,255,255,0.15);
+    animation: flutuar 4s ease-in-out infinite;
+  }
+  @keyframes flutuar {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-8px); }
+  }
+  #subtituloMenu {
+    font-family: 'Pirata One', cursive;
+    font-size: clamp(2.2rem, 7vw, 5.5rem);
+    color: #a30000;
+    letter-spacing: 2px;
+    text-shadow:
+      0 0 15px rgba(163, 0, 0, 0.8),
+      0 0 45px rgba(163, 0, 0, 0.45),
+      2px 2px 2px #000;
+    animation: brasa 3s ease-in-out infinite;
+  }
+  @keyframes brasa {
+    0%, 100% { text-shadow: 0 0 15px rgba(163,0,0,0.8), 0 0 45px rgba(163,0,0,0.45), 2px 2px 2px #000; }
+    50%      { text-shadow: 0 0 25px rgba(220,0,0,1),   0 0 70px rgba(220,0,0,0.6),  2px 2px 2px #000; }
+  }
+
+  /* --- botões --- */
+  #botoes {
+    margin-top: 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .botao {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.3rem, 3vw, 2rem);
+    letter-spacing: 4px;
+    padding: 14px 70px;
+    border: 2px solid #6b0000;
+    border-radius: 8px;
+    background: linear-gradient(#2a0a0a, #14060a);
+    color: #e8e6e3;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    box-shadow: 0 4px 0 #3d0000, 0 8px 18px rgba(0,0,0,0.6);
+  }
+  .botao:hover {
+    transform: translateY(-3px) scale(1.05);
+    background: linear-gradient(#4a1010, #200810);
+    box-shadow: 0 7px 0 #3d0000, 0 14px 28px rgba(163,0,0,0.35);
+    color: #fff;
+  }
+  .botao:active {
+    transform: translateY(2px) scale(0.98);
+    box-shadow: 0 2px 0 #3d0000;
+  }
+
+  /* --- tela de despedida (após Sair) --- */
+  #telaSair {
+    background: #000;
+    z-index: 50;
+    display: none;
+    opacity: 0;
+  }
+  #telaSair.aparecer { display: flex; animation: surgir 1.2s ease forwards; }
+  #telaSair p {
+    font-family: 'Pirata One', cursive;
+    font-size: clamp(1.5rem, 4vw, 3rem);
+    color: #5a5a6a;
+  }
+</style>
+</head>
+<body>
+
+  <!-- TELA 0: libera o áudio -->
+  <div class="tela" id="telaToque">
+    <p>TOQUE PARA COMEÇAR</p>
+  </div>
+
+  <!-- TELA 1: splash com o nome na diagonal -->
+  <div class="tela" id="telaSplash">
+    <h1 id="tituloSplash">Trabalho de<br>Leitura e Criação</h1>
+    <p id="dicaSplash">CLIQUE PARA CONTINUAR</p>
+  </div>
+  <div id="flash"></div>
+
+  <!-- TELA 2: menu principal -->
+  <div class="tela" id="telaMenu">
+    <div class="estante estanteCima"><div class="trilhoLivros"></div></div>
+    <div class="estante estanteBaixo"><div class="trilhoLivros"></div></div>
+    <div class="vinheta"></div>
+    <div id="conteudoMenu">
+      <h2 id="tituloMenu">Trabalho de Leitura e Criação</h2>
+      <h1 id="subtituloMenu">O Anjo da Morte</h1>
+      <div id="botoes">
+        <button class="botao" id="btnIniciar">INICIAR</button>
+        <button class="botao" id="btnSair">SAIR</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA 3: história com texto digitando -->
+  <div class="tela" id="telaHistoria">
+    <div id="textoHistoria"></div>
+    <button class="botao" id="btnAvancar">TOQUE PARA AVANÇAR</button>
+  </div>
+
+  <!-- TELA 4: capítulos do trabalho -->
+  <div class="tela" id="telaCapitulos">
+    <div class="estante estanteCima"><div class="trilhoLivros"></div></div>
+    <div class="estante estanteBaixo"><div class="trilhoLivros"></div></div>
+    <div class="vinheta"></div>
+    <div id="conteudoCapitulos">
+      <h1 id="tituloCapitulos">O Anjo da Morte</h1>
+      <div id="gradeCapitulos">
+        <button class="botao botaoCapitulo" data-capitulo="resumo">RESUMO SOBRE O LIVRO</button>
+        <button class="botao botaoCapitulo" data-capitulo="autor">SOBRE O AUTOR</button>
+        <button class="botao botaoCapitulo" data-capitulo="personagens">PERSONAGENS</button>
+        <button class="botao botaoCapitulo" data-capitulo="notas">NOTAS</button>
+        <button class="botao botaoCapitulo" data-capitulo="opiniao">O QUE ACHAMOS SOBRE O LIVRO</button>
+        <button class="botao botaoCapitulo" data-capitulo="curiosidades">CURIOSIDADES</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TELA 5: conteúdo de cada seção -->
+  <div class="tela" id="telaSecao">
+    <h1 id="tituloSecao"></h1>
+    <div id="conteudoSecao"></div>
+    <button class="botao" id="btnVoltar">VOLTAR</button>
+  </div>
+
+  <!-- TELA de despedida -->
+  <div class="tela" id="telaSair">
+    <p>Até a próxima leitura...</p>
+  </div>
+
+<script>
+// ==================== SONS (gerados por código, sem arquivos) ====================
+let ctxAudio = null;
+
+function iniciarAudio() {
+  if (!ctxAudio) {
+    ctxAudio = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  if (ctxAudio.state === 'suspended') ctxAudio.resume();
+}
+
+// Som de impacto do splash: "vush" + "BUM" grave, estilo abertura de jogo
+function somImpacto() {
+  if (!ctxAudio) return;
+  const agora = ctxAudio.currentTime;
+
+  // vush (ruído filtrado que sobe)
+  const dur = 0.5;
+  const buffer = ctxAudio.createBuffer(1, ctxAudio.sampleRate * dur, ctxAudio.sampleRate);
+  const dados = buffer.getChannelData(0);
+  for (let i = 0; i < dados.length; i++) {
+    dados[i] = (Math.random() * 2 - 1) * (i / dados.length);
+  }
+  const ruido = ctxAudio.createBufferSource();
+  ruido.buffer = buffer;
+  const filtro = ctxAudio.createBiquadFilter();
+  filtro.type = 'bandpass';
+  filtro.frequency.setValueAtTime(300, agora);
+  filtro.frequency.exponentialRampToValueAtTime(3000, agora + dur);
+  const ganhoRuido = ctxAudio.createGain();
+  ganhoRuido.gain.setValueAtTime(0.4, agora);
+  ruido.connect(filtro).connect(ganhoRuido).connect(ctxAudio.destination);
+  ruido.start(agora);
+
+  // BUM grave (no momento em que o título "bate")
+  const tImpacto = agora + 0.45;
+  const osc = ctxAudio.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(150, tImpacto);
+  osc.frequency.exponentialRampToValueAtTime(35, tImpacto + 0.7);
+  const ganhoOsc = ctxAudio.createGain();
+  ganhoOsc.gain.setValueAtTime(1.0, tImpacto);
+  ganhoOsc.gain.exponentialRampToValueAtTime(0.001, tImpacto + 0.9);
+  osc.connect(ganhoOsc).connect(ctxAudio.destination);
+  osc.start(tImpacto);
+  osc.stop(tImpacto + 1);
+
+  // estrondo (ruído grave junto com o BUM)
+  const buffer2 = ctxAudio.createBuffer(1, ctxAudio.sampleRate * 0.6, ctxAudio.sampleRate);
+  const dados2 = buffer2.getChannelData(0);
+  for (let i = 0; i < dados2.length; i++) {
+    dados2[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / dados2.length, 2);
+  }
+  const estrondo = ctxAudio.createBufferSource();
+  estrondo.buffer = buffer2;
+  const filtroGrave = ctxAudio.createBiquadFilter();
+  filtroGrave.type = 'lowpass';
+  filtroGrave.frequency.value = 200;
+  const ganhoEstrondo = ctxAudio.createGain();
+  ganhoEstrondo.gain.value = 0.8;
+  estrondo.connect(filtroGrave).connect(ganhoEstrondo).connect(ctxAudio.destination);
+  estrondo.start(tImpacto);
+}
+
+// clique de botão
+function somClique() {
+  if (!ctxAudio) return;
+  const agora = ctxAudio.currentTime;
+  const osc = ctxAudio.createOscillator();
+  osc.type = 'square';
+  osc.frequency.setValueAtTime(600, agora);
+  osc.frequency.exponentialRampToValueAtTime(200, agora + 0.12);
+  const ganho = ctxAudio.createGain();
+  ganho.gain.setValueAtTime(0.15, agora);
+  ganho.gain.exponentialRampToValueAtTime(0.001, agora + 0.15);
+  osc.connect(ganho).connect(ctxAudio.destination);
+  osc.start(agora);
+  osc.stop(agora + 0.15);
+}
+
+// tec-tec de máquina de escrever (bem baixinho)
+function somTecla() {
+  if (!ctxAudio) return;
+  const agora = ctxAudio.currentTime;
+  const osc = ctxAudio.createOscillator();
+  osc.type = 'triangle';
+  osc.frequency.value = 1000 + Math.random() * 600;
+  const ganho = ctxAudio.createGain();
+  ganho.gain.setValueAtTime(0.04, agora);
+  ganho.gain.exponentialRampToValueAtTime(0.001, agora + 0.04);
+  osc.connect(ganho).connect(ctxAudio.destination);
+  osc.start(agora);
+  osc.stop(agora + 0.05);
+}
+
+// tique sutil ao passar o mouse
+function somHover() {
+  if (!ctxAudio) return;
+  const agora = ctxAudio.currentTime;
+  const osc = ctxAudio.createOscillator();
+  osc.type = 'sine';
+  osc.frequency.value = 900;
+  const ganho = ctxAudio.createGain();
+  ganho.gain.setValueAtTime(0.05, agora);
+  ganho.gain.exponentialRampToValueAtTime(0.001, agora + 0.06);
+  osc.connect(ganho).connect(ctxAudio.destination);
+  osc.start(agora);
+  osc.stop(agora + 0.06);
+}
+
+// ==================== LIVROS DA ESTANTE ====================
+const coresLivros = ['#5c2a2a', '#2a3a5c', '#3d5c2a', '#5c4a2a', '#4a2a5c', '#2a5c55', '#6b3320', '#40404f'];
+
+function criarLivros(trilho) {
+  const conjunto = [];
+  for (let i = 0; i < 45; i++) {
+    const altura = 60 + Math.floor(Math.random() * 55);
+    const cor = coresLivros[Math.floor(Math.random() * coresLivros.length)];
+    const inclinado = Math.random() < 0.12 ? ' inclinado' : '';
+    conjunto.push(`<div class="livro${inclinado}" style="height:${altura}px;background:${cor}"></div>`);
+  }
+  // dobra o conjunto para o loop da animação ser contínuo
+  trilho.innerHTML = conjunto.join('') + conjunto.join('');
+}
+
+// preenche todas as estantes do site (menu e capítulos)
+document.querySelectorAll('.trilhoLivros').forEach(criarLivros);
+
+// ==================== FUNDO ANIMADO (batatas, livros, 67 e penas) ====================
+const telaMenu = document.getElementById('telaMenu');
+const telaCapitulos = document.getElementById('telaCapitulos');
+
+function povoarFundo(tela) {
+  // quantidade de cada item passando ao fundo
+  const itensFlutuantes = [];
+  for (let i = 0; i < 14; i++) itensFlutuantes.push('🥔');
+  for (let i = 0; i < 7; i++)  itensFlutuantes.push('📖');
+  for (let i = 0; i < 7; i++)  itensFlutuantes.push('📚');
+  for (let i = 0; i < 4; i++)  itensFlutuantes.push('67');
+  for (const escolha of itensFlutuantes) {
+    const item = document.createElement('div');
+    item.className = escolha === '67' ? 'flutuante num67' : 'flutuante';
+    item.textContent = escolha;
+    item.style.top = (8 + Math.random() * 76) + '%';
+    item.style.fontSize = (18 + Math.random() * 28) + 'px';
+    item.style.animationDuration = (12 + Math.random() * 20) + 's';
+    // atraso negativo: os itens já começam espalhados pela tela
+    item.style.animationDelay = (-Math.random() * 30) + 's';
+    tela.appendChild(item);
+  }
+  // penas caindo (detalhe do anjo)
+  for (let i = 0; i < 6; i++) {
+    const pena = document.createElement('div');
+    pena.className = 'pena';
+    pena.textContent = '🪶';
+    pena.style.left = (5 + Math.random() * 90) + '%';
+    pena.style.animationDuration = (9 + Math.random() * 8) + 's';
+    pena.style.animationDelay = (Math.random() * 10) + 's';
+    tela.appendChild(pena);
+  }
+}
+povoarFundo(telaMenu);
+povoarFundo(telaCapitulos);
+
+// ==================== FLUXO DAS TELAS ====================
+const telaToque = document.getElementById('telaToque');
+const telaSplash = document.getElementById('telaSplash');
+const tituloSplash = document.getElementById('tituloSplash');
+const dicaSplash = document.getElementById('dicaSplash');
+const flash = document.getElementById('flash');
+
+telaToque.addEventListener('click', () => {
+  iniciarAudio();
+  telaToque.style.display = 'none';
+  telaSplash.style.display = 'flex';
+
+  somImpacto();
+  tituloSplash.classList.add('entrar');
+
+  // no momento do impacto: flash + tremor de tela
+  setTimeout(() => {
+    flash.classList.add('piscar');
+    telaSplash.classList.add('tremer');
+  }, 400);
+
+  // depois do impacto, mostra a dica e espera VOCÊ clicar para ir ao menu
+  setTimeout(() => {
+    dicaSplash.classList.add('mostrar');
+    telaSplash.addEventListener('click', () => {
+      somClique();
+      telaSplash.classList.add('sair');
+      telaMenu.classList.add('aparecer');
+    }, { once: true });
+  }, 1300);
+}, { once: true });
+
+// ==================== BOTÕES ====================
+const btnIniciar = document.getElementById('btnIniciar');
+const btnSair = document.getElementById('btnSair');
+const telaSair = document.getElementById('telaSair');
+
+[btnIniciar, btnSair].forEach(b => {
+  b.addEventListener('mouseenter', somHover);
+});
+
+// ==================== TELA DA HISTÓRIA (texto digitando) ====================
+const telaHistoria = document.getElementById('telaHistoria');
+const textoHistoria = document.getElementById('textoHistoria');
+const btnAvancar = document.getElementById('btnAvancar');
+
+// as páginas de texto: cada linha tem seu estilo
+const paginasHistoria = [
+  [
+    { texto: 'Esse trabalho fala sobre um livro de suspense', classe: 'linhaNormal' },
+    { texto: 'Chamado: O Anjo da Morte', classe: 'linhaDestaque' }
+  ],
+  [
+    { texto: 'Esse trabalho foi feito por:', classe: 'linhaNormal' },
+    { texto: 'Bernardo, Gael, Daniel, João.', classe: 'linhaNomes' }
+  ],
+  [
+    { texto: 'Espero que gostem de nosso trabalho.', classe: 'linhaNormal' }
+  ]
+];
+let paginaAtual = 0;
+
+const esperar = ms => new Promise(r => setTimeout(r, ms));
+
+// escreve o texto letra por letra, como se alguém digitasse
+function digitarLinha(el, texto, velocidade = 55) {
+  return new Promise(resolve => {
+    el.classList.add('digitando');
+    let i = 0;
+    const intervalo = setInterval(() => {
+      i++;
+      el.textContent = texto.slice(0, i);
+      if (i % 2 === 0) somTecla();
+      if (i >= texto.length) {
+        clearInterval(intervalo);
+        el.classList.remove('digitando');
+        resolve();
+      }
+    }, velocidade);
+  });
+}
+
+async function mostrarPagina(n) {
+  if (n >= paginasHistoria.length) return; // segurança: não existe página além da última
+  textoHistoria.innerHTML = '';
+  btnAvancar.classList.remove('visivel');
+  for (const linha of paginasHistoria[n]) {
+    const el = document.createElement('div');
+    el.className = linha.classe;
+    textoHistoria.appendChild(el);
+    await digitarLinha(el, linha.texto);
+    await esperar(400);
+  }
+  if (n < paginasHistoria.length - 1) {
+    btnAvancar.classList.add('visivel');
+  } else {
+    // fim da história: espera um pouco e vai para a tela de capítulos
+    await esperar(1600);
+    telaHistoria.classList.add('sumir');
+    telaCapitulos.classList.add('aparecer');
+  }
+}
+
+btnIniciar.addEventListener('click', () => {
+  somClique();
+  telaMenu.classList.add('sumir');
+  setTimeout(() => {
+    telaMenu.style.display = 'none';
+    telaHistoria.classList.add('aparecer');
+    mostrarPagina(0);
+  }, 800);
+});
+
+btnAvancar.addEventListener('mouseenter', somHover);
+btnAvancar.addEventListener('click', () => {
+  // ignora cliques enquanto o texto ainda está digitando (botão invisível)
+  if (!btnAvancar.classList.contains('visivel')) return;
+  somClique();
+  paginaAtual++;
+  mostrarPagina(paginaAtual);
+});
+
+// ==================== TELA DAS SEÇÕES ====================
+const telaSecao = document.getElementById('telaSecao');
+const tituloSecao = document.getElementById('tituloSecao');
+const conteudoSecao = document.getElementById('conteudoSecao');
+const btnVoltar = document.getElementById('btnVoltar');
+
+const titulosSecoes = {
+  resumo: 'Resumo Sobre o Livro',
+  autor: 'Sobre o Autor',
+  personagens: 'Personagens',
+  notas: 'Notas dos Participantes',
+  opiniao: 'O Que Achamos Sobre o Livro',
+  curiosidades: 'Curiosidades'
+};
+
+const notasParticipantes = [
+  { nome: 'Bernardo', nota: 10 },
+  { nome: 'João', nota: 10 },
+  { nome: 'Daniel', nota: 7 },
+  { nome: 'Gael', nota: 3 }
+];
+
+// cor da nota: 9+ dourada, 6+ laranja, abaixo disso vermelha
+function classeDaNota(nota) {
+  if (nota >= 9) return 'notaOtima';
+  if (nota >= 6) return 'notaBoa';
+  return 'notaRuim';
+}
+
+function montarNotas() {
+  notasParticipantes.forEach((p, i) => {
+    const linha = document.createElement('div');
+    linha.className = 'linhaNota';
+    // cada linha entra um pouco depois da anterior
+    linha.style.animationDelay = (0.3 + i * 0.35) + 's';
+    const nome = document.createElement('span');
+    nome.className = 'nomeNota';
+    nome.textContent = p.nome + ':';
+    const valor = document.createElement('span');
+    valor.className = 'valorNota ' + classeDaNota(p.nota);
+    valor.textContent = p.nota + '/10';
+    linha.append(nome, valor);
+    conteudoSecao.appendChild(linha);
+  });
+}
+
+// ==================== PERSONAGENS ====================
+const personagensPrincipais = [
+  { nome: 'Miguel', descricao: 'O líder do grupo. Ele é o responsável por planejar as ações e manter os amigos unidos e seguros durante a investigação.' },
+  { nome: 'Calu', descricao: 'O centro emocional deste livro. Ele decide investigar o caso por conta própria para vingar o assassinato de seu querido professor de teatro.' },
+  { nome: 'Crânio', descricao: 'O cérebro pensante. Ele usa sua lógica impecável para decifrar os enigmas e pistas que o professor deixou antes de morrer.' },
+  { nome: 'Magrí', descricao: 'A atleta do grupo. Sua agilidade física é fundamental nos momentos de perigo, além de ser o principal apoio de Calu.' },
+  { nome: 'Chumbinho', descricao: 'O membro mais jovem. Astuto e corajoso, ele ajuda a conseguir informações invadindo locais de difícil acesso.' }
+];
+const personagensSecundarios = [
+  { nome: 'Soloman Friedman', descricao: 'O professor de teatro de Calu. Judeu e sobrevivente do Holocausto, seu assassinato no início do livro dá início a toda a trama.' },
+  { nome: 'Kurt Kraut (Komandant)', descricao: 'O grande vilão da história. É um ex-oficial nazista cruel que vive escondido no Brasil e lidera um grupo neonazista.' },
+  { nome: 'Davi Segal e Ferénc Gabór', descricao: 'Amigos de Soloman e também sobreviventes dos campos de concentração. Eles ajudam os Karas a entender o passado do professor.' },
+  { nome: 'Detetive Andrade', descricao: 'O policial aliado dos Karas. Ele tenta manter os jovens fora de perigo, mas acaba aceitando a ajuda deles para resolver o crime.' }
+];
+
+// quando true, o VOLTAR retorna para a escolha Principais/Secundários
+let vendoListaPersonagens = false;
+
+function montarEscolhaPersonagens() {
+  vendoListaPersonagens = false;
+  tituloSecao.textContent = 'Personagens';
+  conteudoSecao.innerHTML = '';
+  const grupo = document.createElement('div');
+  grupo.id = 'escolhaPersonagens';
+  const opcoes = [
+    { rotulo: 'PRINCIPAIS', titulo: 'Personagens Principais', lista: personagensPrincipais },
+    { rotulo: 'SECUNDÁRIOS', titulo: 'Personagens Secundários', lista: personagensSecundarios }
+  ];
+  for (const opcao of opcoes) {
+    const botao = document.createElement('button');
+    botao.className = 'botao botaoEscolha';
+    botao.textContent = opcao.rotulo;
+    botao.addEventListener('mouseenter', somHover);
+    botao.addEventListener('click', () => {
+      somClique();
+      montarListaPersonagens(opcao.titulo, opcao.lista);
+    });
+    grupo.appendChild(botao);
+  }
+  conteudoSecao.appendChild(grupo);
+}
+
+function montarListaPersonagens(titulo, lista) {
+  vendoListaPersonagens = true;
+  tituloSecao.textContent = titulo;
+  conteudoSecao.innerHTML = '';
+  lista.forEach((p, i) => {
+    const carta = document.createElement('div');
+    carta.className = 'cartaPersonagem';
+    // cada cartão entra um pouco depois do anterior
+    carta.style.animationDelay = (0.15 + i * 0.18) + 's';
+    const nome = document.createElement('div');
+    nome.className = 'nomePersonagem';
+    nome.textContent = p.nome;
+    const desc = document.createElement('p');
+    desc.className = 'descPersonagem';
+    desc.textContent = p.descricao;
+    carta.append(nome, desc);
+    conteudoSecao.appendChild(carta);
+  });
+}
+
+// ==================== SOBRE O AUTOR ====================
+const topicosAutor = [
+  { titulo: 'Origem e Nascimento', texto: 'Pedro Bandeira de Luna Filho nasceu em Santos (SP), no dia 9 de março de 1942.' },
+  { titulo: 'Formação e Primeiros Trabalhos', texto: 'Mudou-se para São Paulo em 1961 para cursar Ciências Sociais na Universidade de São Paulo (USP). Antes de se consagrar na literatura, trabalhou como ator, diretor e cenógrafo no teatro profissional, além de atuar como jornalista, publicitário e professor de literatura.' },
+  { titulo: 'Carreira Literária', texto: 'Começou a publicar histórias infantis em 1972, mas ganhou enorme notoriedade nacional a partir de 1983, passando a se dedicar inteiramente à escrita.' },
+  { titulo: 'Temas de Suas Obras', texto: 'Suas obras costumam unir suspense, aventura e amizade com discussões profundas sobre ética, cidadania, direitos humanos e o perigo de regimes autoritários, ajudando a formar gerações de leitores críticos.' }
+];
+
+function montarAutor() {
+  const nome = document.createElement('div');
+  nome.className = 'nomeAutor';
+  nome.textContent = 'Pedro Bandeira';
+  nome.style.animationDelay = '0.1s';
+  conteudoSecao.appendChild(nome);
+  topicosAutor.forEach((t, i) => {
+    const carta = document.createElement('div');
+    carta.className = 'cartaPersonagem';
+    carta.style.animationDelay = (0.3 + i * 0.18) + 's';
+    const titulo = document.createElement('div');
+    titulo.className = 'nomePersonagem';
+    titulo.textContent = t.titulo;
+    const texto = document.createElement('p');
+    texto.className = 'descPersonagem';
+    texto.textContent = t.texto;
+    carta.append(titulo, texto);
+    conteudoSecao.appendChild(carta);
+  });
+}
+
+// ==================== O QUE ACHAMOS SOBRE O LIVRO ====================
+function montarOpiniao() {
+  const carta = document.createElement('div');
+  carta.className = 'cartaOpiniao';
+  carta.style.animationDelay = '0.2s';
+  const texto = document.createElement('p');
+  texto.className = 'textoOpiniao';
+  texto.textContent = '“Achamos um livro muito bom, porém muito pesado, mas sempre com um suspense no ar. Nós indicamos para todos com mais de 12 anos lerem esse livro!”';
+  carta.appendChild(texto);
+  conteudoSecao.appendChild(carta);
+
+  // selo de classificação indicativa, estilo filme/jogo
+  const selo = document.createElement('div');
+  selo.className = 'selo12';
+  selo.style.animationDelay = '0.8s';
+  const quadrado = document.createElement('div');
+  quadrado.className = 'quadrado12';
+  quadrado.textContent = '12';
+  const textoSelo = document.createElement('span');
+  textoSelo.className = 'textoSelo';
+  textoSelo.textContent = 'Recomendado para maiores de 12 anos';
+  selo.append(quadrado, textoSelo);
+  conteudoSecao.appendChild(selo);
+}
+
+function abrirSecao(capitulo) {
+  vendoListaPersonagens = false;
+  conteudoSecao.innerHTML = '';
+  tituloSecao.textContent = titulosSecoes[capitulo];
+  if (capitulo === 'notas') {
+    montarNotas();
+  } else if (capitulo === 'personagens') {
+    montarEscolhaPersonagens();
+  } else if (capitulo === 'opiniao') {
+    montarOpiniao();
+  } else if (capitulo === 'autor') {
+    montarAutor();
+  } else {
+    // >>> AQUI vamos montar o conteúdo das outras seções <<<
+    const aviso = document.createElement('p');
+    aviso.className = 'avisoEmBreve';
+    aviso.textContent = 'Em breve...';
+    conteudoSecao.appendChild(aviso);
+  }
+  telaCapitulos.classList.add('sumir');
+  setTimeout(() => {
+    telaCapitulos.classList.remove('aparecer', 'sumir');
+    telaSecao.classList.add('aparecer');
+  }, 500);
+}
+
+// ==================== BOTÕES DOS CAPÍTULOS ====================
+document.querySelectorAll('.botaoCapitulo').forEach(botao => {
+  botao.addEventListener('mouseenter', somHover);
+  botao.addEventListener('click', () => {
+    somClique();
+    abrirSecao(botao.dataset.capitulo);
+  });
+});
+
+btnVoltar.addEventListener('mouseenter', somHover);
+btnVoltar.addEventListener('click', () => {
+  somClique();
+  // se estiver vendo uma lista de personagens, volta só para a escolha
+  if (vendoListaPersonagens) {
+    montarEscolhaPersonagens();
+    return;
+  }
+  telaSecao.classList.add('sumir');
+  setTimeout(() => {
+    telaSecao.classList.remove('aparecer', 'sumir');
+    telaCapitulos.classList.add('aparecer');
+  }, 500);
+});
+
+btnSair.addEventListener('click', () => {
+  somClique();
+  setTimeout(() => {
+    window.close(); // funciona quando o navegador permite
+    // se o navegador bloquear o fechamento, mostra a despedida
+    telaSair.classList.add('aparecer');
+  }, 300);
+});
+</script>
+</body>
+</html>
