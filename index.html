@@ -117,6 +117,55 @@
   }
   #dicaSplash.mostrar { animation: pulsar 1.6s ease-in-out infinite; }
 
+  /* batatas esguichando no impacto (estilo Silksong) */
+  .particulaBatata {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    opacity: 0;
+    pointer-events: none;
+    will-change: transform, opacity;
+    animation: esguichar 1.1s cubic-bezier(0.15, 0.7, 0.35, 1) forwards;
+  }
+  @keyframes esguichar {
+    0%   { transform: translate(-50%, -50%) rotate(0deg) scale(0.2); opacity: 0; }
+    12%  { opacity: 1; }
+    55%  { transform: translate(calc(-50% + var(--dx) * 0.85), calc(-50% + var(--dy) * 0.85 - 25px)) rotate(calc(var(--rot) * 0.7)) scale(1.15); opacity: 1; }
+    100% { transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy) + 110px)) rotate(var(--rot)) scale(0.8); opacity: 0; }
+  }
+
+  /* ============ SPLASH 2: agradecimento ao iniciar ============ */
+  #telaSplash2 {
+    background: radial-gradient(circle at center, #1a1a2e 0%, #0a0a0f 70%);
+    z-index: 28;
+    display: none;
+  }
+  #tituloSplash2 {
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1.8rem, 7vw, 5rem);
+    color: #f2f2f2;
+    text-align: center;
+    line-height: 1.05;
+    max-width: 92vw;
+    transform: rotate(-8deg) scale(14);
+    opacity: 0;
+    text-shadow: 4px 4px 0 #8b0000, 8px 8px 0 #300000, 0 0 40px rgba(139, 0, 0, 0.6);
+    -webkit-text-stroke: 2px #000;
+  }
+  #tituloSplash2.entrar { animation: slamDiagonal 0.55s cubic-bezier(0.15, 0.9, 0.3, 1.4) forwards; }
+  #telaSplash2.tremer { animation: tremer 0.4s linear; }
+  #telaSplash2.sair { animation: desvanecer 0.8s ease forwards; }
+  #dicaSplash2 {
+    position: absolute;
+    bottom: 12%;
+    font-family: 'Bangers', cursive;
+    font-size: clamp(1rem, 2.5vw, 1.6rem);
+    color: #8a8a9a;
+    letter-spacing: 4px;
+    opacity: 0;
+  }
+  #dicaSplash2.mostrar { animation: pulsar 1.6s ease-in-out infinite; }
+
   /* ============ TELA 2: MENU PRINCIPAL ============ */
   #telaMenu {
     background: linear-gradient(#0d0d14 0%, #16121c 50%, #0d0d14 100%);
@@ -238,6 +287,20 @@
     #gradeCapitulos { grid-template-columns: minmax(240px, 1fr); }
   }
   #telaCapitulos.sumir { animation: desvanecer 0.5s ease forwards; }
+  .botaoInicio {
+    font-size: clamp(0.85rem, 1.8vw, 1.05rem);
+    letter-spacing: 3px;
+    padding: 10px 34px;
+    border-color: #3d3d4a;
+    background: linear-gradient(#1a1a22, #101016);
+    color: #a8a5a0;
+    box-shadow: 0 4px 0 #23232c, 0 8px 18px rgba(0,0,0,0.6);
+  }
+  .botaoInicio:hover {
+    border-color: #6b0000;
+    color: #fff;
+    box-shadow: 0 7px 0 #23232c, 0 14px 28px rgba(163,0,0,0.3);
+  }
 
   /* ============ TELA 5: SEÇÕES (conteúdo dos capítulos) ============ */
   #telaSecao {
@@ -625,6 +688,12 @@
     </div>
   </div>
 
+  <!-- SPLASH 2: agradecimento ao clicar em INICIAR -->
+  <div class="tela" id="telaSplash2">
+    <h1 id="tituloSplash2">Obrigado por iniciar<br>nosso trabalho!</h1>
+    <p id="dicaSplash2">CLIQUE PARA CONTINUAR</p>
+  </div>
+
   <!-- TELA 3: história com texto digitando -->
   <div class="tela" id="telaHistoria">
     <div id="textoHistoria"></div>
@@ -646,6 +715,7 @@
         <button class="botao botaoCapitulo" data-capitulo="opiniao">O QUE ACHAMOS SOBRE O LIVRO</button>
         <button class="botao botaoCapitulo" data-capitulo="curiosidades">CURIOSIDADES</button>
       </div>
+      <button class="botao botaoInicio" id="btnInicio">VOLTAR AO INÍCIO</button>
     </div>
   </div>
 
@@ -825,12 +895,62 @@ function povoarFundo(tela) {
 povoarFundo(telaMenu);
 povoarFundo(telaCapitulos);
 
+// ==================== BATATAS ESGUICHANDO NO IMPACTO ====================
+// espalha batatas a partir do centro, como as larvas saindo em Silksong
+function esguicharBatatas(tela, quantidade = 28) {
+  for (let i = 0; i < quantidade; i++) {
+    const batata = document.createElement('div');
+    batata.className = 'particulaBatata';
+    batata.textContent = '🥔';
+    const angulo = Math.random() * Math.PI * 2;
+    const distancia = 110 + Math.random() * 400;
+    batata.style.setProperty('--dx', Math.cos(angulo) * distancia + 'px');
+    batata.style.setProperty('--dy', Math.sin(angulo) * distancia + 'px');
+    batata.style.setProperty('--rot', (Math.random() * 900 - 450) + 'deg');
+    batata.style.fontSize = (14 + Math.random() * 26) + 'px';
+    batata.style.animationDelay = (Math.random() * 0.18) + 's';
+    batata.style.animationDuration = (0.9 + Math.random() * 0.7) + 's';
+    tela.appendChild(batata);
+    setTimeout(() => batata.remove(), 2200);
+  }
+}
+
 // ==================== FLUXO DAS TELAS ====================
 const telaToque = document.getElementById('telaToque');
 const telaSplash = document.getElementById('telaSplash');
 const tituloSplash = document.getElementById('tituloSplash');
 const dicaSplash = document.getElementById('dicaSplash');
 const flash = document.getElementById('flash');
+const telaSplash2 = document.getElementById('telaSplash2');
+const tituloSplash2 = document.getElementById('tituloSplash2');
+const dicaSplash2 = document.getElementById('dicaSplash2');
+
+// splash de agradecimento, igual ao da abertura
+function mostrarSplash2() {
+  telaSplash2.classList.remove('tremer', 'sair');
+  dicaSplash2.classList.remove('mostrar');
+  tituloSplash2.classList.remove('entrar');
+  telaSplash2.style.display = 'flex';
+  void tituloSplash2.offsetWidth; // reinicia a animacao do titulo
+  tituloSplash2.classList.add('entrar');
+  somImpacto();
+  setTimeout(() => {
+    flash.classList.remove('piscar');
+    void flash.offsetWidth;
+    flash.classList.add('piscar');
+    telaSplash2.classList.add('tremer');
+    esguicharBatatas(telaSplash2);
+  }, 400);
+  setTimeout(() => {
+    dicaSplash2.classList.add('mostrar');
+    telaSplash2.addEventListener('click', () => {
+      somClique();
+      telaSplash2.classList.add('sair');
+      telaHistoria.classList.add('aparecer');
+      mostrarPagina(0);
+    }, { once: true });
+  }, 1300);
+}
 
 telaToque.addEventListener('click', () => {
   iniciarAudio();
@@ -844,6 +964,7 @@ telaToque.addEventListener('click', () => {
   setTimeout(() => {
     flash.classList.add('piscar');
     telaSplash.classList.add('tremer');
+    esguicharBatatas(telaSplash);
   }, 400);
 
   // depois do impacto, mostra a dica e espera VOCÊ clicar para ir ao menu
@@ -886,6 +1007,8 @@ const paginasHistoria = [
   ]
 ];
 let paginaAtual = 0;
+// muda quando a tela troca, para uma digitacao em andamento parar sozinha
+let geracaoHistoria = 0;
 
 const esperar = ms => new Promise(r => setTimeout(r, ms));
 
@@ -909,20 +1032,24 @@ function digitarLinha(el, texto, velocidade = 55) {
 
 async function mostrarPagina(n) {
   if (n >= paginasHistoria.length) return; // segurança: não existe página além da última
+  const geracao = ++geracaoHistoria;
   textoHistoria.innerHTML = '';
   btnAvancar.classList.remove('visivel');
   for (const linha of paginasHistoria[n]) {
+    if (geracao !== geracaoHistoria) return; // a tela mudou no meio da digitacao
     const el = document.createElement('div');
     el.className = linha.classe;
     textoHistoria.appendChild(el);
     await digitarLinha(el, linha.texto);
     await esperar(400);
   }
+  if (geracao !== geracaoHistoria) return;
   if (n < paginasHistoria.length - 1) {
     btnAvancar.classList.add('visivel');
   } else {
     // fim da história: espera um pouco e vai para a tela de capítulos
     await esperar(1600);
+    if (geracao !== geracaoHistoria) return;
     telaHistoria.classList.add('sumir');
     telaCapitulos.classList.add('aparecer');
   }
@@ -933,8 +1060,7 @@ btnIniciar.addEventListener('click', () => {
   telaMenu.classList.add('sumir');
   setTimeout(() => {
     telaMenu.style.display = 'none';
-    telaHistoria.classList.add('aparecer');
-    mostrarPagina(0);
+    mostrarSplash2();
   }, 800);
 });
 
@@ -1265,6 +1391,32 @@ document.querySelectorAll('.botaoCapitulo').forEach(botao => {
     abrirSecao(botao.dataset.capitulo);
   });
 });
+
+// volta para o menu principal de qualquer ponto do trabalho
+function voltarAoInicio() {
+  somClique();
+  geracaoHistoria++; // para qualquer digitacao em andamento
+  [telaCapitulos, telaSecao, telaHistoria, telaSplash2].forEach(tela => {
+    tela.classList.remove('aparecer', 'sumir', 'tremer');
+    tela.style.display = '';
+    tela.style.opacity = '';
+  });
+  dicaSplash2.classList.remove('mostrar');
+  tituloSplash2.classList.remove('entrar');
+  textoHistoria.innerHTML = '';
+  btnAvancar.classList.remove('visivel');
+  conteudoSecao.innerHTML = '';
+  paginaAtual = 0;
+  voltarParaEscolha = null;
+  telaMenu.style.display = '';
+  telaMenu.style.opacity = '';
+  telaMenu.classList.remove('sumir');
+  telaMenu.classList.add('aparecer');
+}
+
+const btnInicio = document.getElementById('btnInicio');
+btnInicio.addEventListener('mouseenter', somHover);
+btnInicio.addEventListener('click', voltarAoInicio);
 
 btnVoltar.addEventListener('mouseenter', somHover);
 btnVoltar.addEventListener('click', () => {
