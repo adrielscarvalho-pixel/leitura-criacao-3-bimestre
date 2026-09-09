@@ -353,6 +353,15 @@
     transform: translateX(-45px);
     animation: entrarNota 0.5s ease forwards;
   }
+  /* texto de abertura do resumo */
+  .introResumo {
+    font-family: 'Cinzel', serif;
+    color: #d9d6d1;
+    font-size: clamp(1.05rem, 2.3vw, 1.35rem);
+    line-height: 1.6;
+    text-align: center;
+    max-width: min(760px, 88vw);
+  }
   /* opinião do grupo sobre o livro */
   .cartaOpiniao {
     width: min(720px, 88vw);
@@ -993,9 +1002,9 @@ const personagensPrincipais = [
   { nome: 'Chumbinho', descricao: 'O membro mais jovem. Astuto e corajoso, ele ajuda a conseguir informações invadindo locais de difícil acesso.' }
 ];
 const personagensSecundarios = [
-  { nome: 'Soloman Friedman', descricao: 'O professor de teatro de Calu. Judeu e sobrevivente do Holocausto, seu assassinato no início do livro dá início a toda a trama.' },
+  { nome: 'Solomon Friedman', descricao: 'O professor de teatro de Calu. Judeu e sobrevivente do Holocausto, seu assassinato no início do livro dá início a toda a trama.' },
   { nome: 'Kurt Kraut (Komandant)', descricao: 'O grande vilão da história. É um ex-oficial nazista cruel que vive escondido no Brasil e lidera um grupo neonazista.' },
-  { nome: 'Davi Segal e Ferénc Gabór', descricao: 'Amigos de Soloman e também sobreviventes dos campos de concentração. Eles ajudam os Karas a entender o passado do professor.' },
+  { nome: 'Davi Segal e Ferénc Gabór', descricao: 'Amigos de Solomon e também sobreviventes dos campos de concentração. Eles ajudam os Karas a entender o passado do professor.' },
   { nome: 'Detetive Andrade', descricao: 'O policial aliado dos Karas. Ele tenta manter os jovens fora de perigo, mas acaba aceitando a ajuda deles para resolver o crime.' }
 ];
 
@@ -1071,6 +1080,76 @@ function montarAutor() {
     texto.className = 'descPersonagem';
     texto.textContent = t.texto;
     carta.append(titulo, texto);
+    conteudoSecao.appendChild(carta);
+  });
+}
+
+// ==================== RESUMO SOBRE O LIVRO ====================
+const introResumo = 'O livro Anjo da Morte, escrito por Pedro Bandeira, acompanha o famoso grupo de adolescentes conhecido como Os Karas (Miguel, Crânio, Calu, Chumbinho e Magrí) em uma perigosa investigação contra o ressurgimento do nazismo.';
+
+const partesResumo = [
+  {
+    rotulo: 'O MISTÉRIO PRINCIPAL',
+    titulo: 'O Mistério Principal',
+    itens: [
+      { nome: 'O Crime', texto: 'Solomon Friedman, um grande ator de teatro e amigo/professor de Calu, é brutalmente assassinado pouco antes da estreia de sua nova peça.' },
+      { nome: 'A Pista', texto: 'Um folheto neonazista é encontrado na cena do crime, desencadeando a ação do grupo.' },
+      { nome: 'O Antagonista', texto: 'Os jovens descobrem que o mandante do crime é o "Anjo da Morte", um ex-oficial nazista que comandou um campo de concentração na Segunda Guerra Mundial e se esconde no Brasil usando uma identidade falsa roubada de um judeu.' }
+    ]
+  },
+  {
+    rotulo: 'O DESFECHO E TEMAS',
+    titulo: 'O Desfecho e Temas',
+    itens: [
+      { texto: 'O ator Solomon era o único no país capaz de reconhecer o verdadeiro rosto do antigo oficial nazista.' },
+      { texto: 'Com muita coragem, inteligência e trabalho em equipe, Os Karas expõem o criminoso.' },
+      { texto: 'A obra aborda a importância da amizade, da memória histórica e de como a juventude deve tomar consciência contra preconceitos, tiranias e o perigo de ideias extremistas.' }
+    ]
+  }
+];
+
+function montarEscolhaResumo() {
+  voltarParaEscolha = null;
+  tituloSecao.textContent = 'Resumo Sobre o Livro';
+  conteudoSecao.innerHTML = '';
+  const intro = document.createElement('p');
+  intro.className = 'introResumo';
+  intro.textContent = introResumo;
+  conteudoSecao.appendChild(intro);
+  const grupo = document.createElement('div');
+  grupo.id = 'escolhaPersonagens';
+  for (const parte of partesResumo) {
+    const botao = document.createElement('button');
+    botao.className = 'botao botaoEscolha';
+    botao.textContent = parte.rotulo;
+    botao.addEventListener('mouseenter', somHover);
+    botao.addEventListener('click', () => {
+      somClique();
+      montarParteResumo(parte);
+    });
+    grupo.appendChild(botao);
+  }
+  conteudoSecao.appendChild(grupo);
+}
+
+function montarParteResumo(parte) {
+  voltarParaEscolha = montarEscolhaResumo;
+  tituloSecao.textContent = parte.titulo;
+  conteudoSecao.innerHTML = '';
+  parte.itens.forEach((item, i) => {
+    const carta = document.createElement('div');
+    carta.className = 'cartaPersonagem';
+    carta.style.animationDelay = (0.15 + i * 0.18) + 's';
+    if (item.nome) {
+      const nome = document.createElement('div');
+      nome.className = 'nomePersonagem';
+      nome.textContent = item.nome;
+      carta.appendChild(nome);
+    }
+    const texto = document.createElement('p');
+    texto.className = 'descPersonagem';
+    texto.textContent = item.texto;
+    carta.appendChild(texto);
     conteudoSecao.appendChild(carta);
   });
 }
@@ -1154,6 +1233,8 @@ function abrirSecao(capitulo) {
   tituloSecao.textContent = titulosSecoes[capitulo];
   if (capitulo === 'notas') {
     montarNotas();
+  } else if (capitulo === 'resumo') {
+    montarEscolhaResumo();
   } else if (capitulo === 'personagens') {
     montarEscolhaPersonagens();
   } else if (capitulo === 'opiniao') {
