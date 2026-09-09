@@ -999,11 +999,11 @@ const personagensSecundarios = [
   { nome: 'Detetive Andrade', descricao: 'O policial aliado dos Karas. Ele tenta manter os jovens fora de perigo, mas acaba aceitando a ajuda deles para resolver o crime.' }
 ];
 
-// quando true, o VOLTAR retorna para a escolha Principais/Secundários
-let vendoListaPersonagens = false;
+// quando tem uma função, o VOLTAR retorna para a tela de escolha em vez dos capítulos
+let voltarParaEscolha = null;
 
 function montarEscolhaPersonagens() {
-  vendoListaPersonagens = false;
+  voltarParaEscolha = null;
   tituloSecao.textContent = 'Personagens';
   conteudoSecao.innerHTML = '';
   const grupo = document.createElement('div');
@@ -1027,7 +1027,7 @@ function montarEscolhaPersonagens() {
 }
 
 function montarListaPersonagens(titulo, lista) {
-  vendoListaPersonagens = true;
+  voltarParaEscolha = montarEscolhaPersonagens;
   tituloSecao.textContent = titulo;
   conteudoSecao.innerHTML = '';
   lista.forEach((p, i) => {
@@ -1075,6 +1075,54 @@ function montarAutor() {
   });
 }
 
+// ==================== CURIOSIDADES ====================
+const curiosidades = [
+  {
+    rotulo: 'PRIMEIRA CURIOSIDADE',
+    titulo: 'Alerta Contra o Neonazismo',
+    texto: 'Publicado originalmente na década de 1980, o livro aborda de forma corajosa como ideologias destrutivas e o autoritarismo não desaparecem sozinhos, exigindo consciência crítica e vigilância das novas gerações contra o ressurgimento de organizações neonazistas.'
+  },
+  {
+    rotulo: 'SEGUNDA CURIOSIDADE',
+    titulo: 'Conexão com o Teatro',
+    texto: 'O enredo começa com o assassinato de um grande ator de teatro (que era amigo e professor de Calu, um dos Karas) pouco antes da estreia de uma peça. Por conta disso, o livro compartilha curiosidades e superstições dos palcos, como o clássico hábito teatral de dizer uma palavra específica com a letra "M" antes de entrar em cena.'
+  }
+];
+
+function montarEscolhaCuriosidades() {
+  voltarParaEscolha = null;
+  tituloSecao.textContent = 'Curiosidades';
+  conteudoSecao.innerHTML = '';
+  const grupo = document.createElement('div');
+  grupo.id = 'escolhaPersonagens';
+  for (const c of curiosidades) {
+    const botao = document.createElement('button');
+    botao.className = 'botao botaoEscolha';
+    botao.textContent = c.rotulo;
+    botao.addEventListener('mouseenter', somHover);
+    botao.addEventListener('click', () => {
+      somClique();
+      montarCuriosidade(c);
+    });
+    grupo.appendChild(botao);
+  }
+  conteudoSecao.appendChild(grupo);
+}
+
+function montarCuriosidade(c) {
+  voltarParaEscolha = montarEscolhaCuriosidades;
+  tituloSecao.textContent = c.titulo;
+  conteudoSecao.innerHTML = '';
+  const carta = document.createElement('div');
+  carta.className = 'cartaPersonagem';
+  carta.style.animationDelay = '0.15s';
+  const texto = document.createElement('p');
+  texto.className = 'descPersonagem';
+  texto.textContent = c.texto;
+  carta.appendChild(texto);
+  conteudoSecao.appendChild(carta);
+}
+
 // ==================== O QUE ACHAMOS SOBRE O LIVRO ====================
 function montarOpiniao() {
   const carta = document.createElement('div');
@@ -1101,7 +1149,7 @@ function montarOpiniao() {
 }
 
 function abrirSecao(capitulo) {
-  vendoListaPersonagens = false;
+  voltarParaEscolha = null;
   conteudoSecao.innerHTML = '';
   tituloSecao.textContent = titulosSecoes[capitulo];
   if (capitulo === 'notas') {
@@ -1112,6 +1160,8 @@ function abrirSecao(capitulo) {
     montarOpiniao();
   } else if (capitulo === 'autor') {
     montarAutor();
+  } else if (capitulo === 'curiosidades') {
+    montarEscolhaCuriosidades();
   } else {
     // >>> AQUI vamos montar o conteúdo das outras seções <<<
     const aviso = document.createElement('p');
@@ -1138,9 +1188,9 @@ document.querySelectorAll('.botaoCapitulo').forEach(botao => {
 btnVoltar.addEventListener('mouseenter', somHover);
 btnVoltar.addEventListener('click', () => {
   somClique();
-  // se estiver vendo uma lista de personagens, volta só para a escolha
-  if (vendoListaPersonagens) {
-    montarEscolhaPersonagens();
+  // se veio de uma tela de escolha, volta só para ela
+  if (voltarParaEscolha) {
+    voltarParaEscolha();
     return;
   }
   telaSecao.classList.add('sumir');
